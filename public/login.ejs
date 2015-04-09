@@ -27,6 +27,8 @@
           <section ng-controller="LogInController as loginCtrl">
             <form name="signUpForm" class="chirpy-form" ng-submit="signUpForm.$valid && loginCtrl.signUp()" novalidate>
 
+              <p>{{loginCtrl.serverMessage}}</p>
+
               <fieldset>
               <div class="field input-field">
                 Email <br />
