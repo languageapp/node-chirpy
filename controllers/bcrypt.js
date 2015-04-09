@@ -2,11 +2,11 @@
 var bcrypt = require('bcrypt');
 
   var createUser = function(email, password, callback) {
-    var customer = {};
-    customer.email = email;
+    var user = {};
+    user.email = email;
     bcrypt.hash(password, 10, function(err, hash) {
-      customer.password = hash;
-      callback(customer);
+      user.password = hash;
+      callback(user);
     });
   };
 

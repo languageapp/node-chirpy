@@ -6,7 +6,7 @@
   var root = __dirname + '/public/';
   var port = process.env.PORT || 3000;
 
-//   app.use(express.static(root));
+  app.use(express.static(root));
 
 
   // -- Express Session --
@@ -18,6 +18,10 @@
     genid: function(req) {return genuuid();},
     secret: 'chirp twerp'
   }));
+
+  // -- EJS Templates --
+  app.set('view engine','ejs');
+  app.set('views', root);
 
   // -- Database --
 
@@ -39,16 +43,26 @@
   app.get('/', function(req, res) {
     var sess = req.session;
     console.log('--- '+sess.user);
-
-    if (sess.user) {
-      res.sendFile(root+'index.html');
-    }
-    else {
-      res.redirect('/login');
-    }
+    if (sess.user) {res.sendFile(root+'home.html');}
+    else {res.redirect('/login');}
   });
 
   app.get('/login', function(req, res) {
+    var sess = req.session;
+    res.render('login', {user:sess.user});
+  });
+
+  app.post('/createuser', function(req,res) {
+    var sess = req.session;
+    bcrypt.createUser(req.body.email, req.body.password, function(user) {
+      db.users.insert(user, function(err,docs) {
+        if (err) {return console.error(err);}
+        console.log('Stored user');
+      });
+    });
+    // What should the session store?
+    sess.user = req.body.email;
+    res.redirect('/');
   });
 
 
