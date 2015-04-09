@@ -1,28 +1,57 @@
-var express = require('express');
-var app = express();
+(function() {
 
-var server = require('http').createServer(app);
-var root = __dirname + '/public/';
-app.use(express.static(root));
-var port = process.env.PORT || 3000;
+  var express = require('express');
+  var app = express();
+  var server = require('http').createServer(app);
+  var root = __dirname + '/public/';
+  var port = process.env.PORT || 3000;
 
-// -- Express Session --
-
-var session = require('express-session');
-var genuuid = require('./controllers/uuid');
-
-app.use(session({
-  genid: function(req) {return genuuid();},
-  secret: 'chirp twerp'
-}));
+//   app.use(express.static(root));
 
 
-// --- Server Start ---
-server.listen(port, function(){
-  console.log("Listening on server port " + port);
-});
+  // -- Express Session --
+
+  var session = require('express-session');
+  var genuuid = require('./controllers/uuid');
+
+  app.use(session({
+    genid: function(req) {return genuuid();},
+    secret: 'chirp twerp'
+  }));
+
+  // -- Database --
+
+  var mongojs = require('mongojs');
+  var db = mongojs((process.env.MONGOLAB_URI || 'chirpy-'+process.env.CHIRPY_NODE_ENV), ['users','user-languages']);
+  var bodyParser = require('body-parser');
+  app.use(bodyParser.urlencoded({'extended':'true'}));
+
+  // -- BCrypt --
+  var bcrypt = require('./controllers/bcrypt');
 
 
-app.get('/', function(req, res) {
-  res.sendFile(root+'index.html');
-});
+  // --- Server Start ---
+  server.listen(port, function(){
+    console.log("Listening on server port " + port);
+  });
+
+
+  app.get('/', function(req, res) {
+    var sess = req.session;
+    console.log('--- '+sess.user);
+
+    if (sess.user) {
+      res.sendFile(root+'index.html');
+    }
+    else {
+      res.redirect('/login');
+    }
+  });
+
+  app.get('/login', function(req, res) {
+  });
+
+
+  // Where is this used?
+  module.exports = server;
+}());
